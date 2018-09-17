@@ -1,0 +1,2 @@
+io.github.dropwizard.logging.fluent.FluentExponentialDelayReconnectorFactory
+io.github.dropwizard.logging.fluent.FluentConstantDelayReconnectorFactory

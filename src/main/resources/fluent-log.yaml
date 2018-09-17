@@ -1,0 +1,7 @@
+logging:
+  appenders:
+  - type: fluent
+    sender:
+      type: raw-socket
+      host: ${FLUENT_HOST}
+      port: ${FLUENT_PORT}
