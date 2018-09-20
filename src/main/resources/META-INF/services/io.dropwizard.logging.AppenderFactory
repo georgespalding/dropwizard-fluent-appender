@@ -1,1 +1,2 @@
-io.github.dropwizard.logging.fluent.FluentAppenderFactory
+io.github.dropwizard.logging.fluent.FluentLoggingAppenderFactory
+io.github.dropwizard.logging.fluent.FluentAccessAppenderFactory

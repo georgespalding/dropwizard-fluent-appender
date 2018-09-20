@@ -1,13 +1,12 @@
 server:
+  applicationConnectors:
+  - type: http
+    port: 0
+  adminConnectors:
+  - type: http
+    port: 0
   requestLog:
     appenders: []
 logging:
   appenders:
   - type: fluent
-    tag: "${SERVICE_SERVICE}"
-    customFields:
-      cluster: "${SERVICE_KUBERNETES_CLUSTER}"
-    sender:
-      type: raw-socket
-      host: "OVERRIDE-ME-IN-TEST"
-      port: "OVERRIDE-ME-IN-TEST"

@@ -24,7 +24,7 @@ public class TestApplication extends Application<Configuration> {
 
    @Override
    public void run(Configuration configuration, Environment environment) {
-      environment.jersey().register(new LogResource("com.wikia.dropwizard.logstash.appender.TEST"));
+      environment.jersey().register(new LogResource("fluentd.logging.test"));
       LOG.info("Logstash test application started!!!");
    }
 

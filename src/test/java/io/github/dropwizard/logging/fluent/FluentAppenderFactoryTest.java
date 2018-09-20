@@ -1,6 +1,7 @@
 package io.github.dropwizard.logging.fluent;
 
 import static io.dropwizard.testing.ConfigOverride.config;
+import static io.github.dropwizard.logging.fluent.FluentBaseAppenderFactory.FLUENTD_DEFAULT_PORT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.dropwizard.Configuration;
@@ -36,7 +37,7 @@ public class FluentAppenderFactoryTest {
 
    private final GenericContainer fluentd = new GenericContainer("fluent/fluentd:v0.12")
       .withClasspathResourceMapping("fluent.conf", "/fluentd/etc/fluent.conf", BindMode.READ_ONLY)
-      .withExposedPorts(FluentRawSocketSenderFactory.FLUENTD_DEFAULT_PORT)
+      .withExposedPorts(FLUENTD_DEFAULT_PORT)
       .waitingFor(new LogMessageWaitStrategy().withRegEx(".*?listening fluent socket on 0\\.0\\.0\\.0:24224\n"))
       .withLogConsumer(fluentdLog);
    private URI appUri;
@@ -55,15 +56,14 @@ public class FluentAppenderFactoryTest {
             @Override
             public void evaluate() throws Throwable {
                final String fluentdHost = fluentd.getContainerIpAddress();
-               final String fluentdPort = Integer.toString(fluentd.getMappedPort(FluentRawSocketSenderFactory.FLUENTD_DEFAULT_PORT));
+               final String fluentdPort = Integer.toString(fluentd.getMappedPort(FLUENTD_DEFAULT_PORT));
 
                // Need to defer creation of appRule until fluentd in docker has started, to be able to configure port
                appRule = new DropwizardAppRule<>(
                   TestApplication.class,
                   "integration-test.yaml",
-                  config("logging.appenders[0].tag", TAG),
-                  config("logging.appenders[0].sender.port", fluentdPort),
-                  config("logging.appenders[0].sender.host", fluentdHost));
+                  config("logging.appenders[0].port", fluentdPort),
+                  config("logging.appenders[0].host", fluentdHost));
                appRule.apply(statement, description).evaluate();
             }
          }).around(new ExternalResource() {

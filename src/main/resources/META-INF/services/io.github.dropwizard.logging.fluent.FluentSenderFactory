@@ -1,2 +1,0 @@
-io.github.dropwizard.logging.fluent.FluentRawSocketSenderFactory
-io.github.dropwizard.logging.fluent.FluentNullSenderFactory
