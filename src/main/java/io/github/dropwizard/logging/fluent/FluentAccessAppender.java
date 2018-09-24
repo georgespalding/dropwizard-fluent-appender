@@ -2,27 +2,22 @@ package io.github.dropwizard.logging.fluent;
 
 import ch.qos.logback.access.spi.AccessEvent;
 import ch.qos.logback.access.spi.IAccessEvent;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class FluentAccessAppender extends FluentBaseAppender<IAccessEvent, AccessEvent> {
 
    public FluentAccessAppender(
       String host,
       int port,
-      String tag,
       long reconnectionDelayMillis,
-      int acceptConnectionTimeoutMillis
+      int acceptConnectionTimeoutMillis,
+      FluentEncoder encoder
    ) {
-      super(host, port, tag, reconnectionDelayMillis, acceptConnectionTimeoutMillis);
+      super(host, port, reconnectionDelayMillis, acceptConnectionTimeoutMillis, encoder);
    }
 
    @Override
    protected long getTimeStamp(AccessEvent data) {
       return data.getTimeStamp();
-   }
-
-   protected byte[] packData(AccessEvent data) throws JsonProcessingException {
-      return msgpackMapper.writeValueAsBytes(data);
    }
 
    protected AccessEvent transform(IAccessEvent event) {

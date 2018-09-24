@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Consumer;
 
-public class FluentAppenderFactoryTest {
+public class FluentAppenderV0FactoryTest {
 
    private static final String TAG = "dropwizard." + new TestApplication().getName();
 
@@ -43,7 +43,7 @@ public class FluentAppenderFactoryTest {
    private URI appUri;
    private DropwizardAppRule<Configuration> appRule;
 
-   public FluentAppenderFactoryTest() {
+   public FluentAppenderV0FactoryTest() {
       final EnvironmentVariables environmentVariables = new EnvironmentVariables();
       environmentVariables.set("SERVICE_SERVICE", "LogstashTestService");
       environmentVariables.set("SERVICE_REALM", "junit-test");
@@ -62,8 +62,11 @@ public class FluentAppenderFactoryTest {
                appRule = new DropwizardAppRule<>(
                   TestApplication.class,
                   "integration-test.yaml",
+                  config("logging.appenders[0].host", fluentdHost),
                   config("logging.appenders[0].port", fluentdPort),
-                  config("logging.appenders[0].host", fluentdHost));
+                  config("logging.appenders[0].encoder.type", "v0"),
+                  config("server.requestLog.appenders[0].host", fluentdHost),
+                  config("server.requestLog.appenders[0].port", fluentdPort));
                appRule.apply(statement, description).evaluate();
             }
          }).around(new ExternalResource() {

@@ -17,17 +17,17 @@ public class FluentAccessAppenderFactory extends FluentBaseAppenderFactory<IAcce
    @JsonCreator
    public FluentAccessAppenderFactory(
       @JsonProperty("host")
-      String host,
+         String host,
       @JsonProperty("port")
-      Integer port,
-      @JsonProperty("tag")
-      String tag,
+         Integer port,
       @JsonProperty("reconnectionDelay")
-      Duration reconnectionDelay,
+         Duration reconnectionDelay,
       @JsonProperty("acceptConnectionTimeout")
-      Duration acceptConnectionTimeout
+         Duration acceptConnectionTimeout,
+      @JsonProperty("encoder")
+         FluentEncoderFactory encoder
    ) {
-      super(host, port, tag, reconnectionDelay, acceptConnectionTimeout);
+      super(host, port, reconnectionDelay, acceptConnectionTimeout, encoder);
    }
 
    @Override
@@ -41,10 +41,12 @@ public class FluentAccessAppenderFactory extends FluentBaseAppenderFactory<IAcce
       final FluentAccessAppender appender = new FluentAccessAppender(
          host,
          port,
-         tag.orElse("dropwizard." + applicationName),
          reconnectionDelay.toMilliseconds(),
-         acceptConnectionTimeoutMillis);
+         acceptConnectionTimeoutMillis,
+         encoder.build(applicationName));
 
+      appender.setName("fluent-access");
+      appender.setContext(context);
       appender.addFilter(levelFilterFactory.build(threshold));
       appender.start();
 

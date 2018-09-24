@@ -1,38 +1,26 @@
 package io.github.dropwizard.logging.fluent;
 
-import static java.lang.Math.toIntExact;
-
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import ch.qos.logback.core.net.DefaultSocketConnector;
 import ch.qos.logback.core.net.SocketConnector;
 import ch.qos.logback.core.util.CloseUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.msgpack.core.MessageBufferPacker;
-import org.msgpack.core.MessagePack;
-import org.msgpack.jackson.dataformat.MessagePackFactory;
-import org.msgpack.value.impl.ImmutableExtensionValueImpl;
 
 import javax.net.SocketFactory;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 
 public abstract class FluentBaseAppender<E, VO> extends UnsynchronizedAppenderBase<E> {
 
-   protected final BigInteger ONE_MILLION = BigInteger.TEN.pow(6);
-   protected final ObjectMapper msgpackMapper = new ObjectMapper(new MessagePackFactory());
+   private final int port;
    private final String peerId;
    private final InetAddress address;
-   private final int port;
    private final long reconnectionDelayMillis;
    private final int acceptConnectionTimeoutMillis;
-   private final String tag;
+   private final FluentEncoder encoder;
    private SocketConnector connector;
    private Socket socket;
    private OutputStream out;
@@ -40,14 +28,14 @@ public abstract class FluentBaseAppender<E, VO> extends UnsynchronizedAppenderBa
    public FluentBaseAppender(
       String host,
       int port,
-      String tag,
       long reconnectionDelayMillis,
-      int acceptConnectionTimeoutMillis
+      int acceptConnectionTimeoutMillis,
+      FluentEncoder encoder
    ) {
       this.port = port;
-      this.tag = tag;
       this.reconnectionDelayMillis = reconnectionDelayMillis;
       this.acceptConnectionTimeoutMillis = acceptConnectionTimeoutMillis;
+      this.encoder = encoder;
 
       int errorCount = 0;
       if (port <= 0) {
@@ -80,7 +68,8 @@ public abstract class FluentBaseAppender<E, VO> extends UnsynchronizedAppenderBa
          optimisticConnect();
       }
       try {
-         out.write(encode(transform(event)));
+         final VO data = transform(event);
+         out.write(encoder.encodeFluentEvent(getTimeStamp(data), data));
       } catch (IOException e) {
          closeSocket();
       }
@@ -166,43 +155,7 @@ public abstract class FluentBaseAppender<E, VO> extends UnsynchronizedAppenderBa
       return SocketFactory.getDefault();
    }
 
-   protected byte[] encode(VO event) throws IOException {
-      byte[] tagAndTimestamp = packTagAndTimestamp(getTimeStamp(event));
-      byte[] data = packData(event);
-
-      // Join the first two and the third together
-      byte[] combined = new byte[tagAndTimestamp.length + data.length];
-
-      System.arraycopy(tagAndTimestamp, 0, combined, 0, tagAndTimestamp.length);
-      System.arraycopy(data, 0, combined, tagAndTimestamp.length, data.length);
-      return combined;
-   }
-
-   protected byte[] packTagAndTimestamp(long timestamp) throws IOException {
-      // FIXME having issues encoding EventTime in the desired format for fluent protocol v1
-      // See https://github.com/fluent/fluentd/wiki/Forward-Protocol-Specification-v0#eventtime-ext-format
-      // epoch ms. multiply by 10^6 to get ns.
-      // toLongExact Will carp if there is an overflow (which will happen after 2262-04-11T23:47:16.854Z).
-//      final long epochLong = BigInteger.valueOf(timestamp).multiply(ONE_MILLION).longValueExact();
-//      final byte[] epochNanosBuffer = ByteBuffer.allocate(Long.BYTES).putLong(epochLong).array();
-
-      final MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
-      packer
-         .packArrayHeader(3)
-         .packString(tag)
-         .packInt(toIntExact(timestamp/1000));
-         // For fluent protocol v0:
-         //.packValue(new ImmutableExtensionValueImpl((byte)0, epochNanosBuffer));
-         // For fluent protocol v1:
-         // .addPayload(epochNanosBuffer);
-         // .packExtensionTypeHeader((byte) 0, Long.BYTES)
-      packer.close();
-      return packer.toByteArray();
-   }
-
    protected abstract long getTimeStamp(VO data);
-
-   protected abstract byte[] packData(VO data) throws JsonProcessingException;
 
    protected abstract VO transform(E event);
 

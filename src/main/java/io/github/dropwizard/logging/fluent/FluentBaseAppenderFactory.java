@@ -10,7 +10,6 @@ import io.dropwizard.util.Duration;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.util.Optional;
 
 public abstract class FluentBaseAppenderFactory<E extends DeferredProcessingAware> extends AbstractAppenderFactory<E> {
 
@@ -29,29 +28,29 @@ public abstract class FluentBaseAppenderFactory<E extends DeferredProcessingAwar
    public static final Duration DEFAULT_ACCEPT_CONNECTION_DELAY = Duration.seconds(5);
    protected final Duration reconnectionDelay;
    protected final int acceptConnectionTimeoutMillis;
-   protected final Optional<String> tag;
 
    @NotNull
    protected final String host;
    @Min(1)
    @Max(65535)
    protected final int port;
+   protected final FluentEncoderFactory encoder;
 
    public FluentBaseAppenderFactory(
       String host,
       Integer port,
-      String tag,
       Duration reconnectionDelay,
-      Duration acceptConnectionTimeout
+      Duration acceptConnectionTimeout,
+      FluentEncoderFactory encoder
    ) {
       this.host = host;
       this.port = ofNullable(port).orElse(FLUENTD_DEFAULT_PORT);
-      this.tag = ofNullable(tag);
       this.reconnectionDelay = ofNullable(reconnectionDelay)
          .orElse(DEFAULT_RECONNECTION_DELAY);
       this.acceptConnectionTimeoutMillis = toIntExact(
          ofNullable(acceptConnectionTimeout)
             .orElse(DEFAULT_ACCEPT_CONNECTION_DELAY)
             .toMilliseconds());
+      this.encoder = ofNullable(encoder).orElseGet(() -> new FluentV0EncoderFactory(null));
    }
 }

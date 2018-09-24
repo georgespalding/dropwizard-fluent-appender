@@ -6,7 +6,10 @@ server:
   - type: http
     port: 0
   requestLog:
-    appenders: []
+    appenders:
+    - type: fluent-access
 logging:
   appenders:
   - type: fluent
+    encoder:
+      type: "OVERRIDE IN TESTS"

@@ -17,17 +17,17 @@ public class FluentLoggingAppenderFactory extends FluentBaseAppenderFactory<ILog
    @JsonCreator
    public FluentLoggingAppenderFactory(
       @JsonProperty("host")
-      String host,
+         String host,
       @JsonProperty("port")
-      Integer port,
-      @JsonProperty("tag")
-      String tag,
+         Integer port,
       @JsonProperty("reconnectionDelay")
-      Duration reconnectionDelay,
+         Duration reconnectionDelay,
       @JsonProperty("acceptConnectionTimeout")
-      Duration acceptConnectionTimeout
+         Duration acceptConnectionTimeout,
+      @JsonProperty("encoder")
+         FluentEncoderFactory encoder
    ) {
-      super(host, port, tag, reconnectionDelay, acceptConnectionTimeout);
+      super(host, port, reconnectionDelay, acceptConnectionTimeout, encoder);
    }
 
    @Override
@@ -41,11 +41,13 @@ public class FluentLoggingAppenderFactory extends FluentBaseAppenderFactory<ILog
       final FluentLoggingAppender appender = new FluentLoggingAppender(
          host,
          port,
-         tag.orElse("dropwizard." + applicationName),
          reconnectionDelay.toMilliseconds(),
-         acceptConnectionTimeoutMillis);
+         acceptConnectionTimeoutMillis,
+         encoder.build(applicationName));
 
+      appender.setName("fluent");
       appender.addFilter(levelFilterFactory.build(threshold));
+      appender.setContext(context);
       appender.start();
 
       return wrapAsync(appender, asyncAppenderFactory);
