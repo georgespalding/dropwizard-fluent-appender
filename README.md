@@ -29,27 +29,22 @@ logging:
 Additional configuration keys for the appender
 * `host` - string (default `localhost`)
 * `port` - int (default `24224`)
-* `include` Set of `IncludeOptions` (default [`Context`, `MDC`]). Options are:
-   - `Context` - values from logger context
-   - `MDC` - values from Message Diagnostic Context
-   - `CallerData` - Stacktrace of the log-call-site, needs to be configured   
-* `customFields` - map - key values hard coded in the config (default `{}`)
+* `reconnectionDelay` - Duration (default `30s`
+* `acceptConnectionTimeout` - Duration (default `5s`)
+* `encoder`
+   - `type` - encoder version, one of [`v0`, `v1`]
+   - `tag` - Optional tag (default `dropwizard.` + application name)
 
 Example config:
 ```yaml
 logging:
   appenders:
   - type: fluent
-    tag: "dropwizard.TestApplication"
-    include: 
-      - Context
-      - MDC
-    customFields:
-      realm: "production"
-    sender:
-      type: raw-socket
-      host: ${LOGSTASH_HOST}
-      port: ${LOGSTASH_PORT}
+    host: ${FLUENTD_HOST}
+    port: ${FLUENTD_PORT}
+    encoder:
+      type: v0
+      tag: "dropwizard.TestApplication"
 ```
 
 *Note:* To make `${vars}` work, it is required that a `SubstitutingSourceProvider` is configured in your application.
