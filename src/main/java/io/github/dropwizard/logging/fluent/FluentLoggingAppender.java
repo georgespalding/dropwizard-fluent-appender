@@ -21,6 +21,7 @@ public class FluentLoggingAppender extends FluentBaseAppender<ILoggingEvent, Log
       return data.getTimeStamp();
    }
 
+   @Override
    protected LoggingEventVO transform(ILoggingEvent event) {
       if (event == null) {
          return null;

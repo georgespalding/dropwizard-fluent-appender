@@ -25,7 +25,7 @@ public abstract class FluentBaseAppenderFactory<E extends DeferredProcessingAwar
     * Default timeout when waiting for the remote server to accept our
     * connection.
     */
-   public static final Duration DEFAULT_ACCEPT_CONNECTION_DELAY = Duration.seconds(5);
+   public static final Duration DEFAULT_ACCEPT_CONNECTION_TIMEOUT = Duration.seconds(5);
    protected final Duration reconnectionDelay;
    protected final int acceptConnectionTimeoutMillis;
 
@@ -49,7 +49,7 @@ public abstract class FluentBaseAppenderFactory<E extends DeferredProcessingAwar
          .orElse(DEFAULT_RECONNECTION_DELAY);
       this.acceptConnectionTimeoutMillis = toIntExact(
          ofNullable(acceptConnectionTimeout)
-            .orElse(DEFAULT_ACCEPT_CONNECTION_DELAY)
+            .orElse(DEFAULT_ACCEPT_CONNECTION_TIMEOUT)
             .toMilliseconds());
       this.encoder = ofNullable(encoder).orElseGet(() -> new FluentV0EncoderFactory(null));
    }

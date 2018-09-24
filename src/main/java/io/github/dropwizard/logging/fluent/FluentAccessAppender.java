@@ -20,6 +20,7 @@ public class FluentAccessAppender extends FluentBaseAppender<IAccessEvent, Acces
       return data.getTimeStamp();
    }
 
+   @Override
    protected AccessEvent transform(IAccessEvent event) {
       if (event == null) {
          return null;
