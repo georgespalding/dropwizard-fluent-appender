@@ -1,0 +1,2 @@
+io.github.geospa.logback.fluent.dropwizard.logger.FluentLoggingAppenderFactory
+io.github.dropwizard.logback.fluent.access.FluentAccessAppenderFactory

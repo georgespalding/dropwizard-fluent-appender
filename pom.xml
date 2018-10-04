@@ -7,7 +7,7 @@
    <artifactId>dropwizard-fluent-appender</artifactId>
    <name>Dropwizard fluent appender</name>
    <version>0.12.0-SNAPSHOT</version>
-   <packaging>jar</packaging>
+   <packaging>pom</packaging>
 
    <description>
       Add-on for dropwizard to log using the fluent-logger
@@ -48,6 +48,13 @@
       <msgpack.version>0.8.16</msgpack.version>
    </properties>
 
+   <modules>
+      <module>logback-fluent</module>
+      <module>logback-access-fluent</module>
+      <module>dropwizard-logging-fluent</module>
+      <module>dropwizard-logging-access-fluent</module>
+   </modules>
+   
    <dependencyManagement>
       <dependencies>
          <dependency>
@@ -78,46 +85,28 @@
             <artifactId>testcontainers</artifactId>
             <version>1.8.3</version>
          </dependency>
+         <dependency>
+            <groupId>io.github.georgespalding</groupId>
+            <artifactId>logback-fluent</artifactId>
+            <version>${project.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>io.github.georgespalding</groupId>
+            <artifactId>logback-access-fluent</artifactId>
+            <version>${project.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>io.github.georgespalding</groupId>
+            <artifactId>dropwizard-logging-fluent</artifactId>
+            <version>${project.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>io.github.georgespalding</groupId>
+            <artifactId>dropwizard-logging-access-fluent</artifactId>
+            <version>${project.version}</version>
+         </dependency>
       </dependencies>
    </dependencyManagement>
-
-   <dependencies>
-      <dependency>
-         <groupId>io.dropwizard</groupId>
-         <artifactId>dropwizard-logging</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>io.dropwizard</groupId>
-         <artifactId>dropwizard-request-logging</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.msgpack</groupId>
-         <artifactId>jackson-dataformat-msgpack</artifactId>
-      </dependency>
-
-      <dependency>
-         <groupId>io.dropwizard</groupId>
-         <artifactId>dropwizard-testing</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>com.github.stefanbirkner</groupId>
-         <artifactId>system-rules</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.testcontainers</groupId>
-         <artifactId>testcontainers</artifactId>
-         <scope>test</scope>
-         <exclusions>
-            <!-- newer version than dropwizard -->
-            <exclusion>
-               <groupId>javax.annotation</groupId>
-               <artifactId>javax.annotation-api</artifactId>
-            </exclusion>
-         </exclusions>
-      </dependency>
-   </dependencies>
 
    <build>
       <plugins>
