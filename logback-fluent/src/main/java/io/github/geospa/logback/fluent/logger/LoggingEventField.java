@@ -1,6 +1,6 @@
 package io.github.geospa.logback.fluent.logger;
 
-import static java.util.Arrays.stream;
+import static io.github.geospa.logback.fluent.EventFieldFactory.validateConstantEventFieldName;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -21,14 +21,18 @@ public interface LoggingEventField extends EventField<ILoggingEvent> {
 
    @JsonCreator
    static LoggingEventField fromName(String name) {
-      if (name.contains(".")) {
+      if (name.contains("=")) {
+         final Tuple<String, String> tuple = EventField.nameParts(name, '=');
+         validateConstantEventFieldName(
+            tuple.first(),
+            StandardLoggingEventField.values(),
+            DynamicLoggingEventFieldFactory.values());
+         return new LoggingEventField.ConstantLoggingEventField(tuple.first(), tuple.second());
+      } else if (name.contains(".")) {
          final Tuple<String, String> tuple = EventField.nameParts(name, '.');
          return DynamicLoggingEventFieldFactory
             .valueOf(tuple.first())
             .buildGetter(tuple.second());
-      } else if (name.contains("=")) {
-         final Tuple<String, String> tuple = EventField.nameParts(name, '=');
-         return new LoggingEventField.ConstantLoggingEventField(tuple.first(), tuple.second());
       } else {
          return StandardLoggingEventField.valueOf(name);
       }
@@ -39,12 +43,6 @@ public interface LoggingEventField extends EventField<ILoggingEvent> {
 
       public ConstantLoggingEventField(String name, String value) {
          super(name, value);
-
-         // Validate the name does not conflict with predefined ones
-         if (stream(StandardLoggingEventField.values())
-            .anyMatch(std -> std.name().equals(name))) {
-            throw new IllegalArgumentException(name + " is a standard logging event field");
-         }
       }
 
    }

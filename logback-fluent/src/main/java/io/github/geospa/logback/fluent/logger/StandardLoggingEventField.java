@@ -4,6 +4,7 @@ import static java.util.Arrays.stream;
 import static java.util.Optional.ofNullable;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.IThrowableProxy;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -116,8 +117,27 @@ public enum StandardLoggingEventField implements LoggingEventField {
          ObjectNode parent,
          ObjectMapper factory
       ) {
+         event.getThrowableProxy().getCause();
+
          ofNullable(event.getThrowableProxy())
-            .ifPresent(tp -> parent.set(name(), factory.valueToTree(tp)));
+            .ifPresent(tp -> appendCause(tp, parent));
+      }
+
+      public void appendCause(
+         IThrowableProxy proxy,
+         ObjectNode parent
+      ) {
+         final ObjectNode throwableNode = parent.putObject(throwable.name());
+         throwableNode.put("message", proxy.getMessage());
+         throwableNode.put("type", proxy.getClassName());
+         final ArrayNode stackTrace = throwableNode.putArray("stackTrace");
+         stream(proxy.getStackTraceElementProxyArray())
+            .forEach(ste -> stackTrace.add(ste.getSTEAsString()));
+
+         final IThrowableProxy cause = proxy.getCause();
+         if (null != cause && proxy != cause) {
+            appendCause(cause, throwableNode.putObject("cause"));
+         }
       }
    },
 

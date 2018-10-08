@@ -7,7 +7,7 @@ import io.github.geospa.logback.fluent.EventFieldFactory;
 import io.github.geospa.logback.fluent.logger.LoggingEventField.DynamicLoggingEventField;
 
 public enum DynamicLoggingEventFieldFactory implements EventFieldFactory<ILoggingEvent, DynamicLoggingEventField> {
-   mdcField {
+   mdc {
       public DynamicLoggingEventField buildGetter(String property) {
          return new DynamicLoggingEventField(name() + "." + property) {
             @Override
@@ -21,7 +21,7 @@ public enum DynamicLoggingEventFieldFactory implements EventFieldFactory<ILoggin
          };
       }
    },
-   contextField {
+   context {
       public DynamicLoggingEventField buildGetter(String property) {
          return new DynamicLoggingEventField(name() + "." + property) {
             @Override

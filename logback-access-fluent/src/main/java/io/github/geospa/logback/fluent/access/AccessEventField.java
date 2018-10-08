@@ -1,6 +1,6 @@
 package io.github.geospa.logback.fluent.access;
 
-import static java.util.Arrays.stream;
+import static io.github.geospa.logback.fluent.EventFieldFactory.validateConstantEventFieldName;
 
 import ch.qos.logback.access.spi.IAccessEvent;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -35,14 +35,18 @@ public interface AccessEventField extends EventField<IAccessEvent> {
 
    @JsonCreator
    static AccessEventField fromName(String name) {
-      if (name.contains(".")) {
+      if (name.contains("=")) {
+         final Tuple<String, String> tuple = EventField.nameParts(name, '=');
+         validateConstantEventFieldName(
+            tuple.first(),
+            StandardAccessEventField.values(),
+            DynamicAccessEventFieldFactory.values());
+         return new ConstantAccessEventField(tuple.first(), tuple.second());
+      } else if (name.contains(".")) {
          final Tuple<String, String> tuple = EventField.nameParts(name, '.');
          return DynamicAccessEventFieldFactory
             .valueOf(tuple.first())
             .buildGetter(tuple.second());
-      } else if (name.contains("=")) {
-         final Tuple<String, String> tuple = EventField.nameParts(name, '=');
-         return new ConstantAccessEventField(tuple.first(), tuple.second());
       } else {
          return StandardAccessEventField.valueOf(name);
       }
@@ -52,12 +56,6 @@ public interface AccessEventField extends EventField<IAccessEvent> {
 
       public ConstantAccessEventField(String name, String value) {
          super(name, value);
-
-         // Validate the name does not conflict with predefined ones
-         if (stream(StandardAccessEventField.values())
-            .anyMatch(std -> std.name().equals(name))) {
-            throw new IllegalArgumentException(name + " is a standard access event field");
-         }
       }
 
    }
